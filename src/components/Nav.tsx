@@ -47,17 +47,17 @@ export function Nav() {
         <a href="#top" className="hit shrink-0" aria-label="OJ's Auto Sales and Rental, back to top">
           <Wordmark />
         </a>
-        <ul className="hidden items-center gap-1 lg:flex">
+        <ul className="hidden items-center gap-0.5 lg:flex">
           {navLinks.map((l) => (
             <li key={l.href}>
-              <a href={l.href} className="rounded-[6px] px-3 py-2 text-[14px] text-paper/80 transition-colors hover:text-paper">
+              <a href={l.href} className="whitespace-nowrap rounded-[6px] px-2.5 py-2 text-[14px] text-paper/80 transition-colors hover:text-paper xl:px-3">
                 {l.label}
               </a>
             </li>
           ))}
         </ul>
         <div className="flex items-center gap-2">
-          <a href={`tel:${main.e164}`} className="btn btn-ghost hidden min-h-[40px] text-[12.5px] md:inline-flex tabular">
+          <a href={`tel:${main.e164}`} className="btn btn-ghost hidden min-h-[40px] text-[12.5px] md:inline-flex lg:hidden xl:inline-flex tabular">
             <Phone size={16} weight="bold" aria-hidden />
             {main.display}
           </a>
