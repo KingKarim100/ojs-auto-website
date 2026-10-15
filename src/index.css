@@ -1,0 +1,465 @@
+@import 'tailwindcss';
+
+/*
+  OJ'S design tokens
+  Layout concept: one dark automotive studio that the whole page floats over. The 3D car lives
+  on a single fixed stage; hero, showroom and island story are transparent windows onto it.
+  Later sections are solid graphite panels that slide over the stage.
+  Single dark theme by design (a lit car in a dark studio). Every colour is set explicitly.
+  One accent: OJ's red, taken from their business card. Radius system: 6px everywhere.
+*/
+
+@font-face {
+  font-family: 'Archivo Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  src: url('./assets/fonts/archivo-latin-wdth-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('./assets/fonts/geist-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist Mono Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('./assets/fonts/geist-mono-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+@theme {
+  --color-ink: #0b0b0d;
+  --color-ink-2: #131316;
+  --color-ink-3: #1b1b1f;
+  --color-line: rgb(240 238 234 / 0.12);
+  --color-line-strong: rgb(240 238 234 / 0.24);
+  --color-paper: #f0eeea;
+  --color-muted: #a7a5ac;
+  --color-silver: #c3c6cc;
+  --color-red: #d7264a;
+  --color-red-hover: #e13a5c;
+  --color-sand: #f2d4a8;
+
+  --font-display: 'Archivo Variable', 'Arial Narrow', Arial, sans-serif;
+  --font-body: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --radius-ui: 6px;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: dark;
+  /* z-index scale */
+  --z-stage: 0;
+  --z-content: 1;
+  --z-nav: 30;
+  --z-fab: 40;
+  --z-dialog: 50;
+  --z-skip: 60;
+}
+
+html {
+  background: var(--color-ink);
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--color-ink);
+}
+
+@layer components {
+.gutter {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (min-width: 768px) {
+  .gutter {
+    padding-left: max(32px, env(safe-area-inset-left, 0px));
+    padding-right: max(32px, env(safe-area-inset-right, 0px));
+  }
+}
+@media (min-width: 1280px) {
+  .gutter {
+    padding-left: max(56px, env(safe-area-inset-left, 0px));
+    padding-right: max(56px, env(safe-area-inset-right, 0px));
+  }
+}
+
+.display {
+  font-family: var(--font-display);
+  font-stretch: 118%;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.012em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+.display-tight {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 760;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  text-wrap: balance;
+}
+.label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* The fixed 3D stage sits behind everything. Transparent sections let pointer events through to it. */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-stage);
+  transition: opacity 0.3s linear;
+}
+.stage-canvas {
+  touch-action: pan-y;
+  cursor: grab;
+}
+.stage-canvas:active {
+  cursor: grabbing;
+}
+.pass {
+  pointer-events: none;
+}
+.pass .hit,
+.pass a,
+.pass button,
+.pass input,
+.pass select,
+.pass label,
+.pass textarea {
+  pointer-events: auto;
+}
+
+.glass {
+  background: rgb(19 19 22 / 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--color-line);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 24px 60px -24px rgb(0 0 0 / 0.6);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--color-ink-2);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0 1.4rem;
+  border-radius: var(--radius-ui);
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    transform 0.12s ease-out,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+.btn:active {
+  transform: scale(0.975);
+}
+.btn-primary {
+  background: var(--color-red);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--color-red-hover);
+}
+.btn-secondary {
+  background: rgb(240 238 234 / 0.04);
+  color: var(--color-paper);
+  border: 1px solid var(--color-line-strong);
+}
+.btn-secondary:hover {
+  border-color: var(--color-paper);
+  background: rgb(240 238 234 / 0.08);
+}
+.btn-ghost {
+  color: var(--color-paper);
+  padding: 0 0.75rem;
+}
+.btn-ghost:hover {
+  background: rgb(240 238 234 / 0.06);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-red);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.field > span {
+  font-size: 12.5px;
+  font-weight: 560;
+  color: #d6d4d9;
+  letter-spacing: 0.01em;
+}
+.input {
+  width: 100%;
+  min-height: 46px;
+  border-radius: var(--radius-ui);
+  border: 1px solid var(--color-line-strong);
+  background: rgb(11 11 13 / 0.6);
+  color: var(--color-paper);
+  padding: 0 0.85rem;
+  font: inherit;
+  font-size: 15px;
+  transition: border-color 0.15s ease;
+}
+.input:hover {
+  border-color: rgb(240 238 234 / 0.4);
+}
+.input:focus-visible {
+  outline: 2px solid var(--color-red);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+.input[aria-invalid='true'] {
+  border-color: #ff6b84;
+}
+.input::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+}
+select.input {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #c9c7cd 50%), linear-gradient(135deg, #c9c7cd 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 52%,
+    calc(100% - 13px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2rem;
+}
+select.input option {
+  background: #16161a;
+  color: var(--color-paper);
+}
+.error-text {
+  font-size: 12.5px;
+  color: #ff8ca0;
+}
+
+.badge-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 24px;
+  padding: 0 0.55rem;
+  border-radius: var(--radius-ui);
+  border: 1px dashed rgb(240 238 234 / 0.38);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #dcdadf;
+  white-space: nowrap;
+}
+
+.light-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 42%, rgb(220 228 240 / 0.14) 49%, rgb(255 255 255 / 0.35) 50%, rgb(220 228 240 / 0.14) 51%, transparent 58%);
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  animation: sweep 1.5s cubic-bezier(0.5, 0, 0.3, 1) 0.15s forwards;
+  opacity: 0;
+}
+@keyframes sweep {
+  0% {
+    opacity: 1;
+    background-position: 130% 0;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: -30% 0;
+  }
+}
+
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .js-anim .reveal-pending {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  .reveal-in {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.7s var(--ease-out-quint),
+      transform 0.7s var(--ease-out-quint);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .light-sweep {
+    display: none;
+  }
+}
+
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  z-index: var(--z-skip);
+  transform: translateY(-160%);
+}
+.skip-link:focus-visible {
+  transform: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+html.is-fs main > *:not(#showroom),
+html.is-fs footer,
+html.is-fs .site-nav,
+html.is-fs .fab,
+html.is-fs #showroom .showroom-chrome {
+  visibility: hidden;
+}
+
+/* Hero entrance: text rises into place while the car is lit. CTAs are clickable throughout. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-lines > span {
+    animation: rise 0.9s var(--ease-out-quint) both;
+  }
+  .hero-lines > span:nth-child(2) {
+    animation-delay: 0.12s;
+  }
+  .hero-sub {
+    animation: rise 0.9s var(--ease-out-quint) 0.28s both;
+  }
+  .spec-swap {
+    animation: rise 0.55s var(--ease-out-quint) 0.35s both;
+  }
+  .dialog-in {
+    animation: rise 0.35s var(--ease-out-quint) both;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Photo stage */
+.stage-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 40%, rgb(255 255 255 / 0.1) 48%, rgb(255 255 255 / 0.28) 50%, rgb(255 255 255 / 0.1) 52%, transparent 60%);
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stage-sweep.run {
+    animation: sweep 1.1s cubic-bezier(0.5, 0, 0.3, 1) forwards;
+  }
+  .photo-in {
+    animation: photoIn 0.75s var(--ease-out-quint) both;
+  }
+  .hero-media {
+    animation: heroIn 1.6s var(--ease-out-quint) both;
+  }
+}
+@keyframes photoIn {
+  from {
+    opacity: 0;
+    transform: scale(1.035);
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+}
